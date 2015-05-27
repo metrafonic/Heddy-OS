@@ -142,7 +142,7 @@ void Alert(char *StringOfCharacters){
 	_delay_ms(15);
 	Send_Kommando(0x01);
 	_delay_ms(15);
-	for(i=0;i<2;i++){
+	for(i=0;i<1;i++){
 		Send_Kort_Streng("ÿÿÿÿÿALERT!ÿÿÿÿÿ");
 		_delay_ms(30);
 		Send_Kommando(0x01);
@@ -151,6 +151,7 @@ void Alert(char *StringOfCharacters){
 	Send_Kort_Streng("ÿÿÿÿÿALERT!ÿÿÿÿÿ");
 	Send_Kommando(0x80+40);
 	Send_Kort_Streng(StringOfCharacters);
+	Send_Kommando(0x80+70);
 	_delay_ms(170);
 	Send_Kommando(0x01);
 	_delay_ms(15);
