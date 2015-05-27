@@ -11,7 +11,7 @@ int main(void){
 		Send_Kommando(0x40+40);
 		Send_Kort_Streng("|Brightness|");
 		while(1){
-			
+			//demo data
 		}
 	}
 	
