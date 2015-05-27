@@ -163,11 +163,14 @@ void Message(char *StringOfCharacters){
 	_delay_ms(15);
 	Send_Kommando(0x01);
 	_delay_ms(15);
-	Send_Kort_Streng("ÿÿÿÿLoading.ÿÿÿÿ");
+	Send_Kort_Streng("   Loading");
+	for(i=0;i<3;i++){
+		Send_Kort_Streng(".");
+		_delay_ms(35);
+	}
 	Send_Kommando(0x80+40);
 	Send_Kort_Streng(StringOfCharacters);
 	Send_Kommando(0x80+70);
-	_delay_ms(170);
 	Send_Kommando(0x01);
 	_delay_ms(15);
 	

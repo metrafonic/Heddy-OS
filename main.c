@@ -6,10 +6,12 @@
 void BrightnessScreen(void);
 void TimeScreen(void);
 void AboutScreen(void);
+void ContrastScreen(void);
 void menu(int num);
 
 int Avail=1;
 int selected=1;
+int Backlight=1;
 
 int main(void){
 	
@@ -17,7 +19,8 @@ int main(void){
 	PORTC |= 1 << PINC0;	// set som 1
 	DDRC &= ~(1<< PINC1); //Set som 0
 	PORTC |= 1 << PINC1;	// set som 1
-	
+	DDRC |= 1 << PINC7;
+	PORTC ^= 1 << PINC7;
 	
 	InitializeLCD();
 	LoadingScreen();
@@ -28,11 +31,13 @@ int main(void){
 			if (Avail){
 				Avail=0;
 				if(selected==1){
-					BrightnessScreen();
+					ContrastScreen();
 				}else if(selected==2){
 					TimeScreen();
 				}else if(selected==3){
 					AboutScreen();
+				}else if(selected==4){
+					BacklightScreen();
 				}
 			}else{
 				Avail=1;
@@ -44,12 +49,14 @@ int main(void){
 				menu(1);
 			}
 		}
-		if (ButtonPressed(1,PINC,0,100) && Avail==1){
+		if (Avail==1 && ButtonPressed(1,PINC,0,100)){
 			if(selected==1){
 				menu(2);
 			}else if(selected==2){
 				menu(3);
 			}else if(selected==3){
+				menu(4);
+			}else if(selected==4){
 				menu(1);
 			}
 		}
@@ -69,12 +76,12 @@ ISR(ADC_vect){
 	ADCSRA |=1<<ADSC;
 }
 
-void BrightnessScreen(void){
+void ContrastScreen(void){
 	Send_Kommando(0b00001100);
-	Message("Bightness");
+	Message("Contrast");
 	Send_Kort_Streng("- Exit");
 	Send_Kommando(0x80+40);
-	Send_Kort_Streng("Brightness:");
+	Send_Kort_Streng("Contrast:");
 	ADCSRA |= 1<<ADPS2;
 	ADMUX  |=1<<ADLAR;
 	ADMUX |= 1<<REFS0;
@@ -92,6 +99,38 @@ void TimeScreen(void){
 	Send_Kommando(0x80+40);
 	Send_Kort_Streng("Time:   in progress");	
 }
+void BacklightScreen(void){
+	Message("Backlight");
+	Send_Kort_Streng("- Save");
+	Send_Kommando(0x80+40);
+	if (Backlight){
+		Send_Kort_Streng("Backlight:   ON ");
+	}else{
+		Send_Kort_Streng("Backlight:   OFF");
+	}
+	while(1){
+		if (ButtonPressed(1,PINC,0,100)){
+			Send_Kommando(0x80+40);
+			PORTC ^= 1 << PINC7;
+			if (Backlight){
+				Send_Kort_Streng("Backlight:   OFF ");
+				Backlight=0;
+			}else{
+				Send_Kort_Streng("Backlight:   ON  ");
+				Backlight=1;
+			}
+			//break;
+		}
+		if (ButtonPressed(0,PINC,1,100)){
+			Clear_Screen();
+			Send_Kort_Streng("Saved");
+			Send_Kommando(0x80+40);
+			Send_Kort_Streng("       OK");
+			break;
+			
+		}
+	}
+}
 void AboutScreen(void){
 	Message("About");
 	Send_Streng("Heddy OS - Created by Mathias Hedberg. metrafonic.com");	
@@ -105,11 +144,13 @@ void menu(int num){
 	Send_Bokstav(0b01111111);
 	selected=num;
 	if (num==1){
-		Send_Kort_Streng("  Brightness");
+		Send_Kort_Streng("  Contrast");
 	}else if (num==2){
 		Send_Kort_Streng("     Time");
 	}else if (num==3){
 		Send_Kort_Streng("     About");
+	}else if (num==4){
+		Send_Kort_Streng("  Backlight");
 	}
 	
 	Send_Kommando(0x80+55);
