@@ -21,6 +21,7 @@
 #define RS_Pin 2
 
 void Sjekk_Opptatt(void);
+void Message(char *StringOfCharacters);
 void Clear_Screen(void);
 void InitializeLCD(void);
 void AlleTegn(void);
@@ -125,13 +126,13 @@ void AlleTegn(){
 void LoadingScreen(){
 	int i;
 	_delay_ms(20);
-	Send_Kort_Streng("Loading OS");
+	Send_Kort_Streng("Heddy OS");
 	_delay_ms(10);
 	Send_Kommando(0x80+40);
 	_delay_ms(10);
 	for(i=0;i<16;i++){
 		Send_Bokstav(0b11111111);
-		_delay_ms(30);
+		_delay_ms(10);
 	}
 	_delay_ms(15);
 	Send_Kommando(0x01);
@@ -149,6 +150,20 @@ void Alert(char *StringOfCharacters){
 		_delay_ms(30);
 	}
 	Send_Kort_Streng("ÿÿÿÿÿALERT!ÿÿÿÿÿ");
+	Send_Kommando(0x80+40);
+	Send_Kort_Streng(StringOfCharacters);
+	Send_Kommando(0x80+70);
+	_delay_ms(170);
+	Send_Kommando(0x01);
+	_delay_ms(15);
+	
+}
+void Message(char *StringOfCharacters){
+	int i;
+	_delay_ms(15);
+	Send_Kommando(0x01);
+	_delay_ms(15);
+	Send_Kort_Streng("ÿÿÿÿLoading.ÿÿÿÿ");
 	Send_Kommando(0x80+40);
 	Send_Kort_Streng(StringOfCharacters);
 	Send_Kommando(0x80+70);
