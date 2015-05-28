@@ -6,7 +6,7 @@ A menu for viewing the brightness level via ADC is in progress.
 
 Feel free to branch this project.
 
-![https://metrafonic.com/content/images/2015/05/IMG_20150527_223532.jpg](https://metrafonic.com/content/images/2015/05/IMG_20150527_223532.jpg)
+![](https://metrafonic.com/content/images/2015/05/99999.JPG)
 
 Currently features:
 
