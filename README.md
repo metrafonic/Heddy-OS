@@ -13,5 +13,7 @@ Currently features:
  - Contrast Dialog
  - About Screen with scrolling text
  - Backlight Control
+ - UART Transmitter
+ - UART Reciever
 
 Fell free to branch this project.
