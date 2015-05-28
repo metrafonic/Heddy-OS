@@ -7,6 +7,8 @@ void BrightnessScreen(void);
 void TimeScreen(void);
 void AboutScreen(void);
 void ContrastScreen(void);
+void TXScreen(void);
+void RXScreen(void);
 void menu(int num);
 
 int Avail=1;
@@ -38,7 +40,12 @@ int main(void){
 					AboutScreen();
 				}else if(selected==4){
 					BacklightScreen();
+				}else if(selected==5){
+					TXScreen();
+				}else if(selected==6){
+					RXScreen();
 				}
+
 			}else{
 				Avail=1;
 				ADCSRA =0b00000000;
@@ -57,8 +64,13 @@ int main(void){
 			}else if(selected==3){
 				menu(4);
 			}else if(selected==4){
+				menu(5);
+			}else if(selected==5){
+				menu(6);
+			}else if(selected==6){
 				menu(1);
 			}
+			
 		}
 		
 	}
@@ -131,6 +143,74 @@ void BacklightScreen(void){
 		}
 	}
 }
+void TXScreen(void){
+	int i=0;
+	char antall[4];
+	Message("");
+	Send_Kort_Streng("- Exit");
+	int UBBRValue = 25;
+	unsigned char receiveData;
+	UBRRH = (unsigned char) (UBBRValue >> 8);
+	UBRRL = (unsigned char) UBBRValue; 
+	UCSRB = (1 << RXEN) | (1 << TXEN);
+	UCSRC = (1 << USBS) | (3 << UCSZ0); 
+	Send_Kommando(0x80+40);
+	Send_Kort_Streng("Sent:  ");
+	while(1){
+		if (ButtonPressed(1,PINC,0,100)){
+			Send_Kommando(0x80+53);
+			i++;
+			itoa(i, antall, 10);
+			Send_Kort_Streng(antall);
+			
+		}
+		if (ButtonPressed(0,PINC,1,100)){
+				Clear_Screen();
+				Send_Kort_Streng("Thank you!");
+				Send_Kommando(0x80+40);
+				Send_Kort_Streng("       OK");
+				break;
+				
+		}
+		
+	}
+	
+}
+void RXScreen(void){
+	int i=0;
+	Message("");
+	Send_Kort_Streng("- Exit");
+	int UBBRValue = 25;
+	unsigned char receiveData;
+	UBRRH = (unsigned char) (UBBRValue >> 8);
+	UBRRL = (unsigned char) UBBRValue; 
+	UCSRB = (1 << RXEN) | (1 << TXEN);
+	UCSRC = (1 << USBS) | (3 << UCSZ0); 
+
+		while (! (UCSRA & (1 << RXC)) ){
+
+			receiveData = UDR;
+			if ((receiveData == 0b11111111)){
+				//Clear_Screen();
+				Send_Kommando(0x80+52);
+				char antall[4];
+				itoa(i, antall, 10);
+				Send_Kort_Streng(antall);
+				i++;
+			}
+			if (ButtonPressed(0,PINC,1,100)){
+				Clear_Screen();
+				Send_Kort_Streng("Thank you!");
+				Send_Kommando(0x80+40);
+				Send_Kort_Streng("       OK");
+				break;
+			
+			}
+		}
+		
+	
+	
+}
 void AboutScreen(void){
 	Message("About");
 	Send_Streng("Heddy OS - Created by Mathias Hedberg. metrafonic.com");	
@@ -151,6 +231,10 @@ void menu(int num){
 		Send_Kort_Streng("     About");
 	}else if (num==4){
 		Send_Kort_Streng("  Backlight");
+	}else if (num==5){
+		Send_Kort_Streng(" UART Transmit");
+	}else if (num==6){
+		Send_Kort_Streng(" UART Recieve");
 	}
 	
 	Send_Kommando(0x80+55);
