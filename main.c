@@ -10,6 +10,7 @@ void ContrastScreen(void);
 void TXScreen(void);
 void RXScreen(void);
 void menu(int num);
+void beep(int length);
 
 int Avail=1;
 int selected=1;
@@ -23,6 +24,13 @@ int main(void){
 	PORTC |= 1 << PINC1;	// set som 1
 	DDRC |= 1 << PINC7;
 	PORTC ^= 1 << PINC7;
+	
+	sei();
+	DDRC |= 1<<PINC6;
+	TIMSK |= 1<<OCIE1A;
+	OCR1A = 150; 
+	
+	
 	
 	InitializeLCD();
 	LoadingScreen();
@@ -57,6 +65,7 @@ int main(void){
 			}
 		}
 		if (Avail==1 && ButtonPressed(1,PINC,0,100)){
+			
 			if(selected==1){
 				menu(2);
 			}else if(selected==2){
@@ -88,6 +97,10 @@ ISR(ADC_vect){
 	ADCSRA |=1<<ADSC;
 }
 
+ISR(TIMER1_COMPA_vect){
+	PORTC ^= 1<<PINC6;
+	
+}
 void ContrastScreen(void){
 	Send_Kommando(0b00001100);
 	Message("Contrast");
@@ -106,7 +119,9 @@ void ContrastScreen(void){
 	
 }
 void TimeScreen(void){
+	beep(1);
 	Alert("In Progress!");
+	beep(0);
 	Send_Kort_Streng("- Exit");
 	Send_Kommando(0x80+40);
 	Send_Kort_Streng("Time:   in progress");	
@@ -146,9 +161,12 @@ void BacklightScreen(void){
 void TXScreen(void){
 	int i=0;
 	char antall[4];
+	char freq[4];
 	Message("");
-	Send_Kort_Streng("- Exit");
+	Send_Kort_Streng("- Exit   freq:");
 	int UBBRValue = 25;
+	itoa(UBBRValue, freq, 10);
+	Send_Kort_Streng(freq);
 	unsigned char receiveData;
 	UBRRH = (unsigned char) (UBBRValue >> 8);
 	UBRRL = (unsigned char) UBBRValue; 
@@ -159,9 +177,16 @@ void TXScreen(void){
 	while(1){
 		if (ButtonPressed(1,PINC,0,100)){
 			Send_Kommando(0x80+53);
+			while (! (UCSRA & (1 << UDRE)) ); 
+
+			//Get that data outa here!
+			UDR = 0b11111111;
 			i++;
 			itoa(i, antall, 10);
 			Send_Kort_Streng(antall);
+			
+
+			//Get that data outa here!
 			
 		}
 		if (ButtonPressed(0,PINC,1,100)){
@@ -178,9 +203,13 @@ void TXScreen(void){
 }
 void RXScreen(void){
 	int i=0;
+	char antall[4];
+	char freq[4];
 	Message("");
-	Send_Kort_Streng("- Exit");
+	Send_Kort_Streng("- Exit   freq:");
 	int UBBRValue = 25;
+	itoa(UBBRValue, freq, 10);
+	Send_Kort_Streng(freq);
 	unsigned char receiveData;
 	UBRRH = (unsigned char) (UBBRValue >> 8);
 	UBRRL = (unsigned char) UBBRValue; 
@@ -216,6 +245,7 @@ void AboutScreen(void){
 	Send_Streng("Heddy OS - Created by Mathias Hedberg. metrafonic.com");	
 }
 
+
 void menu(int num){
 	//Send_Kommando(0b00001101);
 	Clear_Screen();
@@ -239,5 +269,17 @@ void menu(int num){
 	
 	Send_Kommando(0x80+55);
 	Send_Bokstav(0b01111110);
+	
+}
+
+void beep(int start){
+	if (start){
+		TCCR1B |= 1<<CS10 |1<<WGM12;
+	}else{
+		TCCR1B =0;
+		_delay_ms(1);
+		PORTC &= ~(1<< PINC6);
+	}
+	
 	
 }

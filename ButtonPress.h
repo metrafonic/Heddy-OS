@@ -19,6 +19,11 @@ if (Pressed_Confidence_Level[buttonNumber] > confidenceLevel) //Indicator of goo
 {
 if (Pressed[buttonNumber] == 0)
 {
+TCCR1B |= 1<<CS10 |1<<WGM12;
+	_delay_ms(1);
+	TCCR1B =0;
+	_delay_ms(1);
+	PORTC &= ~(1<< PINC6);
 Pressed[buttonNumber] = 1;
 return 1;
 }
